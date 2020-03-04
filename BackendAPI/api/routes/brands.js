@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const authenticate = require('../middleware/authenticate');
 
 const Brand = require('../models/brand');
+const Product = require('../models/product');
+const Category = require('../models/category');
+
 
 
 
@@ -48,5 +51,91 @@ router.post('/create', authenticate, (req, res, next) => {
     });
 
 });
+
+router.get('/:brandSlug', (req, res, next) => {
+
+    const slug = req.params.brandSlug;
+    Brand.findOne({slug: slug})
+    .select('_id')
+    .exec()
+    .then(brand => {
+        if(brand){
+                Product.find({brand: brand._id})
+                .select('_id name price productPic brand slug')
+                .exec()
+                .then(products => {
+                    res.status(200).json({
+                        message: products
+                    })
+                })
+                .catch(error => {
+                    return res.status(404).json({
+                        message: error
+                    })
+                })
+        }else{
+            return res.status(404).json({
+                message: 'Not Found'
+            })
+        }
+    })
+    .catch(er => {
+        res.status(500).json({
+            error: er
+        });
+    });
+});
+
+router.get('/:categorySlug/:brandSlug', (req, res, next) => {
+
+
+    const catslug = req.params.categorySlug;
+    Category.findOne({slug: catslug})
+    .select('_id')
+    .exec()
+    .then(category => {
+        if(category){
+                Product.find({category: category._id})
+                .select('_id name price productPic category slug')
+                .exec()
+                .then(brand => {
+                    if(brand){
+                            Product.find({brand: brand._id})
+                            .select('_id name price productPic brand slug')
+                            .exec()
+                            .then(products => {
+                                res.status(200).json({
+                                    message: products
+                                })
+                            })
+                            .catch(error => {
+                                return res.status(404).json({
+                                    message: error
+                                })
+                            })
+                    }else{
+                        return res.status(404).json({
+                            message: 'Not Found'
+                        })
+                    }
+                })
+                .catch(error => {
+                    return res.status(404).json({
+                        message: error
+                    })
+                })
+        }else{
+            return res.status(404).json({
+                message: 'Not Found'
+            })
+        }
+    })
+    .catch(er => {
+        res.status(500).json({
+            error: er
+        });
+    });
+});
+
 
 module.exports = router;
