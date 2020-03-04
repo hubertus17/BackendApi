@@ -41,7 +41,7 @@ router.post('/create', authenticate, (req, res, next) => {
 router.get('/', (req, res, next) => {
 
     Product.find({})
-    .select('_id name price productPic slug')
+    .select('_id name price productPic category brand oldPrice slug')
     .exec()
     .then(products => {
         res.status(200).json({
@@ -98,75 +98,6 @@ router.get('/:categorySlug', (req, res, next) => {
     });
 });
 
-router.get('/:brandSlug', (req, res, next) => {
-
-    const slug = req.params.brandSlug;
-    Brand.findOne({slug: slug})
-    .select('_id')
-    .exec()
-    .then(brand => {
-        if(brand){
-                Product.find({brand: brand._id})
-                .select('_id name price productPic brand slug')
-                .exec()
-                .then(products => {
-                    res.status(200).json({
-                        message: products
-                    })
-                })
-                .catch(error => {
-                    return res.status(404).json({
-                        message: error
-                    })
-                })
-        }else{
-            return res.status(404).json({
-                message: 'Not Found'
-            })
-        }
-    })
-    .catch(er => {
-        res.status(500).json({
-            error: er
-        });
-    });
-});
-
-router.get('/:categorySlug/:brandSlug', (req, res, next) => {
-
-    const brandSlug = req.params.brandSlug;
-    
-    Brand.findOne({slug: brandSlug})
-    .select('_id')
-    .exec()
-    .then(brand => {
-        if(brand){
-            Product.find({brand: brand._id})
-                .select('_id name price productPic brand slug')
-                .sort(filter)
-                .exec()
-                .then(products => {
-                    res.status(200).json({
-                        message: products
-                    })
-                })
-                .catch(error => {
-                    return res.status(404).json({
-                        message: error
-                    })
-                })
-        }else{
-            return res.status(404).json({
-                message: 'Not Found'
-            })
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err
-        });
-    });
-});
 
 router.get('/:categorySlug/:productSlug', (req, res, next) => {
 
