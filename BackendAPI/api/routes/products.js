@@ -100,11 +100,6 @@ router.get('/:categorySlug', (req, res, next) => {
 
 router.get('/:brandSlug', (req, res, next) => {
 
-    let filter = {};
-    if(req.query.hasOwnProperty("filter")){
-        filter['price'] = req.query.price
-    }
-    
     const slug = req.params.brandSlug;
     Brand.findOne({slug: slug})
     .select('_id')
@@ -113,7 +108,6 @@ router.get('/:brandSlug', (req, res, next) => {
         if(brand){
                 Product.find({brand: brand._id})
                 .select('_id name price productPic brand slug')
-                .sort(filter)
                 .exec()
                 .then(products => {
                     res.status(200).json({
